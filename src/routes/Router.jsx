@@ -15,6 +15,7 @@ import OwnerAnalytics from '../pages/OwnerAnalytics'
 import AddProperty from '../pages/AddProperty'
 import MyProperties from '../pages/MyProperties'
 import AllUsers from '../pages/AllUsers'
+import AdminAllProperties from '../pages/AdminAllProperties'
 import PrivateRoute from './PrivateRoute'
 import AdminRoute from './AdminRoute'
 import OwnerRoute from './OwnerRoute'
@@ -123,7 +124,7 @@ export const router = createBrowserRouter([
         path: 'all-properties',
         element: (
           <AdminRoute>
-            <Profile />
+            <AdminAllProperties />
           </AdminRoute>
         ),
       },
