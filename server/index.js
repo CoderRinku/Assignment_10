@@ -122,6 +122,54 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/properties/all', verifyToken, verifyAdmin, async (req, res) => {
+      const result = await propertiesCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.get('/properties', async (req, res) => {
+      const page = parseInt(req.query.page) || 1
+      const limit = parseInt(req.query.limit) || 6
+      const search = req.query.search || ''
+      const type = req.query.type || ''
+      const minPrice = parseFloat(req.query.minPrice) || 0
+      const maxPrice = parseFloat(req.query.maxPrice) || Infinity
+      const sort = req.query.sort || ''
+
+      const query = { status: 'Approved' }
+
+      if (search) {
+        query.location = { $regex: search, $options: 'i' }
+      }
+      if (type) {
+        query.type = type
+      }
+      if (minPrice || maxPrice !== Infinity) {
+        query.rent = { $gte: minPrice, $lte: maxPrice }
+      }
+
+      let sortDoc = {}
+      if (sort === 'lowToHigh') {
+        sortDoc.rent = 1
+      } else if (sort === 'highToLow') {
+        sortDoc.rent = -1
+      }
+
+      const skip = (page - 1) * limit
+      const total = await propertiesCollection.countDocuments(query)
+      const properties = await propertiesCollection
+        .find(query)
+        .sort(sortDoc)
+        .skip(skip)
+        .limit(limit)
+        .toArray()
+
+      res.send({
+        properties,
+        totalPages: Math.ceil(total / limit)
+      })
+    })
+
     app.get('/', (req, res) => {
       res.send({ status: 'Server is running perfectly' })
     })
