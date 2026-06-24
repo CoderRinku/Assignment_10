@@ -112,6 +112,12 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/properties/:id', async (req, res) => {
+      const id = req.params.id
+      const result = await propertiesCollection.findOne({ _id: new ObjectId(id) })
+      res.send(result)
+    })
+
     app.patch('/properties/status/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id
       const { status, rejectionFeedback } = req.body
