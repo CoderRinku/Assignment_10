@@ -269,7 +269,7 @@ function AllProperties() {
                 setType(e.target.value)
                 setPage(1)
               }}
-              className="w-full bg-gray-55 dark:bg-gray-700 border-none text-sm rounded-lg px-3 py-2.5 outline-none text-gray-800 dark:text-white cursor-pointer"
+              className="w-full bg-gray-50 dark:bg-gray-700 border-none text-sm rounded-lg px-3 py-2.5 outline-none text-gray-805 dark:text-white cursor-pointer"
             >
               <option value="">All Types</option>
               <option value="Apartment">Apartment</option>
