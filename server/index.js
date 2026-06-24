@@ -58,6 +58,8 @@ async function run() {
     const usersCollection = client.db('resideease').collection('users')
     const propertiesCollection = client.db('resideease').collection('properties')
     const bookingsCollection = client.db('resideease').collection('bookings')
+    const favoritesCollection = client.db('resideease').collection('favorites')
+    const reviewsCollection = client.db('resideease').collection('reviews')
     
     app.post('/jwt', (req, res) => {
       const { email } = req.body
@@ -214,6 +216,92 @@ async function run() {
       } catch (err) {
         res.status(500).send({ error: err.message })
       }
+    })
+
+    app.post('/bookings/confirm-payment', verifyToken, async (req, res) => {
+      const { propertyId, transactionId } = req.body
+      const query = {
+        $or: [
+          { _id: new ObjectId(propertyId) },
+          { propertyId: new ObjectId(propertyId) }
+        ],
+        tenantEmail: req.decoded.email
+      }
+      const updateDoc = {
+        $set: {
+          status: 'Paid',
+          transactionId
+        }
+      }
+      const result = await bookingsCollection.updateOne(query, updateDoc)
+      res.send(result)
+    })
+
+    app.get('/bookings/tenant/:email', verifyToken, async (req, res) => {
+      const email = req.params.email
+      if (req.decoded.email !== email) {
+        return res.status(403).send({ message: 'Forbidden access' })
+      }
+      const result = await bookingsCollection.find({ tenantEmail: email }).toArray()
+      res.send(result)
+    })
+
+    app.post('/favorites', verifyToken, async (req, res) => {
+      const { propertyId } = req.body
+      if (!propertyId) {
+        return res.status(400).send({ message: 'Property ID is required' })
+      }
+      const property = await propertiesCollection.findOne({ _id: new ObjectId(propertyId) })
+      if (!property) {
+        return res.status(404).send({ message: 'Property not found' })
+      }
+      const favoriteItem = {
+        tenantEmail: req.decoded.email,
+        propertyId: new ObjectId(propertyId),
+        title: property.title,
+        image: property.image,
+        location: property.location,
+        rent: property.rent,
+        rentType: property.rentType
+      }
+      const result = await favoritesCollection.insertOne(favoriteItem)
+      res.send(result)
+    })
+
+    app.get('/favorites/my-favorites', verifyToken, async (req, res) => {
+      const email = req.decoded.email
+      const result = await favoritesCollection.find({ tenantEmail: email }).toArray()
+      res.send(result)
+    })
+
+    app.delete('/favorites/:id', verifyToken, async (req, res) => {
+      const id = req.params.id
+      const result = await favoritesCollection.deleteOne({ _id: new ObjectId(id) })
+      res.send(result)
+    })
+
+    app.post('/reviews', verifyToken, async (req, res) => {
+      const { propertyId, rating, comment } = req.body
+      if (!propertyId) {
+        return res.status(400).send({ message: 'Property ID is required' })
+      }
+      const user = await client.db('resideease').collection('users').findOne({ email: req.decoded.email })
+      const reviewDoc = {
+        propertyId: new ObjectId(propertyId),
+        name: user?.name || 'Anonymous User',
+        email: req.decoded.email,
+        rating: parseInt(rating) || 5,
+        comment,
+        date: new Date().toISOString().split('T')[0]
+      }
+      const result = await reviewsCollection.insertOne(reviewDoc)
+      res.send({ ...reviewDoc, _id: result.insertedId })
+    })
+
+    app.get('/reviews/property/:id', async (req, res) => {
+      const id = req.params.id
+      const result = await reviewsCollection.find({ propertyId: new ObjectId(id) }).toArray()
+      res.send(result)
     })
 
     app.get('/', (req, res) => {
