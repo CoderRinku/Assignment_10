@@ -29,10 +29,30 @@ const verifyToken = (req, res, next) => {
   })
 }
 
+const verifyAdmin = async (req, res, next) => {
+  const email = req.decoded.email
+  const user = await client.db('resideease').collection('users').findOne({ email })
+  if (user?.role !== 'Admin') {
+    return res.status(403).send({ message: 'Forbidden access' })
+  }
+  next()
+}
+
+const verifyOwner = async (req, res, next) => {
+  const email = req.decoded.email
+  const user = await client.db('resideease').collection('users').findOne({ email })
+  if (user?.role !== 'Owner') {
+    return res.status(403).send({ message: 'Forbidden access' })
+  }
+  next()
+}
+
 async function run() {
   try {
     await client.connect()
     console.log('Successfully connected to MongoDB')
+
+    const usersCollection = client.db('resideease').collection('users')
     
     app.post('/jwt', (req, res) => {
       const { email } = req.body
@@ -41,6 +61,27 @@ async function run() {
       }
       const token = jwt.sign({ email }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '1h' })
       res.send({ token })
+    })
+
+    app.post('/users', async (req, res) => {
+      const user = req.body
+      const query = { email: user.email }
+      const existingUser = await usersCollection.findOne(query)
+      if (existingUser) {
+        return res.send({ message: 'User already exists', insertedId: null })
+      }
+      const result = await usersCollection.insertOne({
+        ...user,
+        role: 'Tenant',
+        status: 'Active'
+      })
+      res.send(result)
+    })
+
+    app.get('/users/role/:email', async (req, res) => {
+      const email = req.params.email
+      const user = await usersCollection.findOne({ email })
+      res.send({ role: user?.role || 'Tenant', status: user?.status || 'Active' })
     })
 
     app.get('/', (req, res) => {
