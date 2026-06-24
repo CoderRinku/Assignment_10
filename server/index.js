@@ -2,12 +2,15 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
+import Stripe from 'stripe'
 import { MongoClient, ObjectId } from 'mongodb'
 
 dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 5000
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'dummy_stripe_key')
 
 app.use(cors())
 app.use(express.json())
@@ -54,6 +57,7 @@ async function run() {
 
     const usersCollection = client.db('resideease').collection('users')
     const propertiesCollection = client.db('resideease').collection('properties')
+    const bookingsCollection = client.db('resideease').collection('bookings')
     
     app.post('/jwt', (req, res) => {
       const { email } = req.body
@@ -168,6 +172,48 @@ async function run() {
         properties,
         totalPages: Math.ceil(total / limit)
       })
+    })
+
+    app.post('/bookings', verifyToken, async (req, res) => {
+      const { propertyId, moveInDate, contactNumber, notes } = req.body
+      if (!propertyId) {
+        return res.status(400).send({ message: 'Property ID is required' })
+      }
+      const property = await propertiesCollection.findOne({ _id: new ObjectId(propertyId) })
+      if (!property) {
+        return res.status(404).send({ message: 'Property not found' })
+      }
+      const booking = {
+        propertyId: new ObjectId(propertyId),
+        propertyTitle: property.title,
+        propertyImage: property.image,
+        rent: property.rent,
+        moveInDate,
+        contactNumber,
+        notes,
+        tenantEmail: req.decoded.email,
+        status: 'Pending'
+      }
+      const result = await bookingsCollection.insertOne(booking)
+      res.send({ bookingId: result.insertedId })
+    })
+
+    app.post('/create-payment-intent', verifyToken, async (req, res) => {
+      const { price } = req.body
+      if (!price) {
+        return res.status(400).send({ message: 'Price is required' })
+      }
+      const amount = Math.round(price * 100)
+      try {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount,
+          currency: 'usd',
+          payment_method_types: ['card']
+        })
+        res.send({ clientSecret: paymentIntent.client_secret })
+      } catch (err) {
+        res.status(500).send({ error: err.message })
+      }
     })
 
     app.get('/', (req, res) => {
