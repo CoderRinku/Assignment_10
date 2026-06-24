@@ -16,6 +16,7 @@ import AddProperty from '../pages/AddProperty'
 import MyProperties from '../pages/MyProperties'
 import AllUsers from '../pages/AllUsers'
 import AdminAllProperties from '../pages/AdminAllProperties'
+import ErrorPage from '../pages/ErrorPage'
 import PrivateRoute from './PrivateRoute'
 import AdminRoute from './AdminRoute'
 import OwnerRoute from './OwnerRoute'
@@ -24,7 +25,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
-    errorElement: <NotFound />,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
