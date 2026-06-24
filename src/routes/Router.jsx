@@ -9,6 +9,11 @@ import Register from '../pages/Register'
 import Payment from '../pages/Payment'
 import Profile from '../pages/Profile'
 import NotFound from '../pages/NotFound'
+import MyBookings from '../pages/MyBookings'
+import Favorites from '../pages/Favorites'
+import OwnerAnalytics from '../pages/OwnerAnalytics'
+import AddProperty from '../pages/AddProperty'
+import MyProperties from '../pages/MyProperties'
 import PrivateRoute from './PrivateRoute'
 import AdminRoute from './AdminRoute'
 import OwnerRoute from './OwnerRoute'
@@ -67,17 +72,17 @@ export const router = createBrowserRouter([
       },
       {
         path: 'bookings',
-        element: <Profile />,
+        element: <MyBookings />,
       },
       {
         path: 'favorites',
-        element: <Profile />,
+        element: <Favorites />,
       },
       {
         path: 'owner-analytics',
         element: (
           <OwnerRoute>
-            <Profile />
+            <OwnerAnalytics />
           </OwnerRoute>
         ),
       },
@@ -85,7 +90,7 @@ export const router = createBrowserRouter([
         path: 'add-property',
         element: (
           <OwnerRoute>
-            <Profile />
+            <AddProperty />
           </OwnerRoute>
         ),
       },
@@ -93,7 +98,7 @@ export const router = createBrowserRouter([
         path: 'my-properties',
         element: (
           <OwnerRoute>
-            <Profile />
+            <MyProperties />
           </OwnerRoute>
         ),
       },
