@@ -304,6 +304,74 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/owner/analytics', verifyToken, verifyOwner, async (req, res) => {
+      const email = req.decoded.email
+      const ownerProperties = await propertiesCollection.find({ 'owner.email': email }).toArray()
+      const propertyIds = ownerProperties.map(p => p._id)
+
+      const bookings = await bookingsCollection.find({ propertyId: { $in: propertyIds } }).toArray()
+      const paidBookings = bookings.filter(b => b.status === 'Paid')
+      
+      const totalProperties = ownerProperties.length
+      const totalBookings = bookings.length
+      const totalEarnings = paidBookings.reduce((sum, b) => sum + (b.rent || 0), 0)
+
+      const monthlyMap = {}
+      paidBookings.forEach(b => {
+        const date = b.moveInDate ? new Date(b.moveInDate) : new Date()
+        const monthStr = date.toLocaleString('default', { month: 'short', year: 'numeric' })
+        monthlyMap[monthStr] = (monthlyMap[monthStr] || 0) + (b.rent || 0)
+      })
+      const chartData = Object.keys(monthlyMap).map(month => ({
+        month,
+        earnings: monthlyMap[month]
+      }))
+
+      res.send({
+        totalProperties,
+        totalBookings,
+        totalEarnings,
+        chartData
+      })
+    })
+
+    app.get('/properties/my-properties', verifyToken, verifyOwner, async (req, res) => {
+      const email = req.decoded.email
+      const result = await propertiesCollection.find({ 'owner.email': email }).toArray()
+      res.send(result)
+    })
+
+    app.patch('/properties/:id', verifyToken, verifyOwner, async (req, res) => {
+      const id = req.params.id
+      const updatedData = req.body
+      const result = await propertiesCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updatedData }
+      )
+      res.send(result)
+    })
+
+    app.get('/bookings/owner/:email', verifyToken, verifyOwner, async (req, res) => {
+      const email = req.params.email
+      if (req.decoded.email !== email) {
+        return res.status(403).send({ message: 'Forbidden access' })
+      }
+      const ownerProperties = await propertiesCollection.find({ 'owner.email': email }).toArray()
+      const propertyIds = ownerProperties.map(p => p._id)
+      const result = await bookingsCollection.find({ propertyId: { $in: propertyIds } }).toArray()
+      res.send(result)
+    })
+
+    app.patch('/bookings/status/:id', verifyToken, verifyOwner, async (req, res) => {
+      const id = req.params.id
+      const { status } = req.body
+      const result = await bookingsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { status } }
+      )
+      res.send(result)
+    })
+
     app.get('/', (req, res) => {
       res.send({ status: 'Server is running perfectly' })
     })
