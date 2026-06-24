@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { MapPin, BedDouble, Bath, Square, Calendar, Heart, Shield, Star, Award, User, Send, X, Phone, FileText } from 'lucide-react'
+import { MapPin, BedDouble, Bath, Square, Calendar, Heart, Shield, Star, Award, User, Send, X, Phone, FileText, Share2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
 
@@ -264,6 +264,11 @@ function PropertyDetails() {
     setTimeout(() => {
       setFavoriteSuccessMsg('')
     }, 3000)
+  }
+
+  const handleShareProperty = () => {
+    navigator.clipboard.writeText(window.location.href)
+    triggerFavoriteAlert('Property link copied to clipboard!')
   }
 
   const handleBookingSubmit = async (e) => {
@@ -551,6 +556,13 @@ function PropertyDetails() {
               >
                 <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
                 <span>{isFavorite ? 'Added to Favorites' : 'Add to Favorites'}</span>
+              </button>
+              <button
+                onClick={handleShareProperty}
+                className="w-full flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-250 font-bold py-3 px-4 rounded-xl transition cursor-pointer"
+              >
+                <Share2 className="w-5 h-5 text-gray-400" />
+                <span>Share Property</span>
               </button>
             </div>
 
