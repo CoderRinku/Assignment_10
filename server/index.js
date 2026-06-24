@@ -372,6 +372,36 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.patch('/users/role/:email', verifyToken, verifyAdmin, async (req, res) => {
+      const email = req.params.email
+      const { role } = req.body
+      const result = await usersCollection.updateOne(
+        { email },
+        { $set: { role } }
+      )
+      res.send(result)
+    })
+
+    app.patch('/users/status/:id', verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id
+      const { status } = req.body
+      const result = await usersCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { status } }
+      )
+      res.send(result)
+    })
+
+    app.get('/admin/transactions', verifyToken, verifyAdmin, async (req, res) => {
+      const result = await bookingsCollection.find({ status: 'Paid' }).toArray()
+      res.send(result)
+    })
+
     app.get('/', (req, res) => {
       res.send({ status: 'Server is running perfectly' })
     })
