@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
-import { MongoClient } from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb'
 
 dotenv.config()
 
@@ -53,6 +53,7 @@ async function run() {
     console.log('Successfully connected to MongoDB')
 
     const usersCollection = client.db('resideease').collection('users')
+    const propertiesCollection = client.db('resideease').collection('properties')
     
     app.post('/jwt', (req, res) => {
       const { email } = req.body
@@ -82,6 +83,43 @@ async function run() {
       const email = req.params.email
       const user = await usersCollection.findOne({ email })
       res.send({ role: user?.role || 'Tenant', status: user?.status || 'Active' })
+    })
+
+    app.post('/properties', verifyToken, verifyOwner, async (req, res) => {
+      const property = req.body
+      const result = await propertiesCollection.insertOne({
+        ...property,
+        status: 'Pending'
+      })
+      res.send(result)
+    })
+
+    app.get('/properties/owner/:email', verifyToken, verifyOwner, async (req, res) => {
+      const email = req.params.email
+      const result = await propertiesCollection.find({ 'owner.email': email }).toArray()
+      res.send(result)
+    })
+
+    app.delete('/properties/:id', verifyToken, async (req, res) => {
+      const id = req.params.id
+      const result = await propertiesCollection.deleteOne({ _id: new ObjectId(id) })
+      res.send(result)
+    })
+
+    app.patch('/properties/status/:id', verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id
+      const { status, rejectionFeedback } = req.body
+      const updateDoc = {
+        $set: { status }
+      }
+      if (rejectionFeedback) {
+        updateDoc.$set.rejectionFeedback = rejectionFeedback
+      }
+      const result = await propertiesCollection.updateOne(
+        { _id: new ObjectId(id) },
+        updateDoc
+      )
+      res.send(result)
     })
 
     app.get('/', (req, res) => {
