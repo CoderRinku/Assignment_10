@@ -408,6 +408,21 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/bookings/report/:id', verifyToken, async (req, res) => {
+      const id = req.params.id
+      const booking = await bookingsCollection.findOne({ _id: new ObjectId(id) })
+      if (!booking) {
+        return res.status(404).send({ message: 'Booking not found' })
+      }
+      if (booking.tenantEmail !== req.decoded.email) {
+        const user = await client.db('resideease').collection('users').findOne({ email: req.decoded.email })
+        if (user?.role !== 'Admin') {
+          return res.status(403).send({ message: 'Forbidden access' })
+        }
+      }
+      res.send(booking)
+    })
+
     app.get('/', (req, res) => {
       res.send({ status: 'Server is running perfectly' })
     })
