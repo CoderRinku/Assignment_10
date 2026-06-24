@@ -670,7 +670,7 @@ function PropertyDetails() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-655 dark:text-gray-350 uppercase mb-1.5">
+                <label className="block text-xs font-bold text-gray-650 dark:text-gray-350 uppercase mb-1.5">
                   Contact Number <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center bg-white dark:bg-gray-900 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-700">
