@@ -1,51 +1,39 @@
-# ResideEase - Property Rental & Booking Platform
+# ResideEase - Property Rental & Booking App
 
-ResideEase is a comprehensive MERN Stack property rental and booking application designed to streamline the leasing experience for Tenants, Property Owners, and System Administrators.
+ResideEase is my property rental and booking platform built using the MERN stack. I developed it to make it easy for tenants to find and rent properties, owners to list their properties and track bookings, and admins to manage users and verify listings.
 
-## Project Links
+## My Repository Link
+- https://github.com/CoderRinku/Assignment_10.git
 
-- **GitHub Repository**: [https://github.com/CoderRinku/Assignment_10.git](https://github.com/CoderRinku/Assignment_10.git)
+## What I Implemented (Key Features)
 
----
+### Tenant Section
+- I built a dashboard where tenants can see their booked properties, check if they paid, see transaction IDs, and update their profile details.
+- Added a wishlist (favorites) section to save listings and a simple booking modal to reserve a property.
+- Integrated Stripe for secure card payments with success redirection.
 
-## Core Features
+### Owner Section
+- Owners can add new properties with images, specifications, and details (these start in "Pending" status).
+- I built an analytics page for owners using Recharts to display total earnings, properties, bookings, and a monthly earnings chart.
+- Owners can also accept or reject booking requests from tenants.
 
-### 1. User Roles & Dashboards
-- **Tenant Dashboard**: View reserved properties, payment status tracker, favorites wishlist management, and profile update options.
-- **Owner Dashboard**: Add property listings, modify property details, view rental analytics with graphical earnings metrics (Recharts), and manage booking request confirmations.
-- **Admin Dashboard**: Manage registered users (role adjustments & block controls), verify submitted property listings with custom feedback response, and monitor overall transaction history.
+### Admin Section
+- Admins can view and manage all registered users, change their roles (like making a tenant an owner), or block them.
+- I built a property verification dashboard where admins review submitted properties and approve them or reject them with custom feedback.
 
-### 2. Secure Payment Gateway
-- Fully integrated with Stripe checkout flow to handle secure credit card payments.
-- Success redirection with transaction details, generating print-ready invoice reports.
+### Other Cool Features
+- Search property listings by location (regex matching).
+- Filter by type and sort by price.
+- Dark/Light mode toggle.
+- Simple loading spinners and error boundary fallback screen.
+- Absolutely zero comments in the codebase to keep the files clean.
 
-### 3. Listings Verification Workflow
-- Owner listings default to `Pending` status.
-- Admin reviews listings, with the capability to reject and provide constructive feedback to owners or approve.
-- Only approved property listings are visible in public searches.
+## Tech Stack I Used
 
-### 4. Advanced Query Capabilities
-- Search properties by location using regex matching.
-- Filter properties by type and price/rent bounds.
-- Sort listings in ascending or descending order of price/rent.
-- Segment results with server-supported pagination.
+- **Frontend**: React, Vite, Tailwind CSS, Framer Motion, Recharts, Stripe Elements, Lucide Icons, Axios, React Router.
+- **Backend**: Node.js, Express.js, MongoDB Atlas, jsonwebtoken (JWT), Stripe SDK.
 
-### 5. UI Polishing & Premium Interactions
-- Animated landing page banner with Framer Motion.
-- Quick link sharing copying to clipboard.
-- Premium Light/Dark mode toggling.
-- Unified Loading spinners and custom global Error Boundary.
-
----
-
-## Tech Stack
-
-- **Frontend**: React (Vite), Tailwind CSS, Framer Motion, Recharts, Stripe Elements, Lucide Icons, Axios, React Router.
-- **Backend**: Node.js, Express.js, MongoDB Atlas driver, jsonwebtoken (JWT), Stripe SDK, Dotenv, CORS.
-
----
-
-## Environment Configuration
+## How I Set Up the Environment
 
 ### Client (`.env.local`)
 ```env
@@ -56,24 +44,18 @@ VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
 ### Server (`server/.env`)
 ```env
 PORT=5000
-DB_URI=your_mongodb_connection_uri
-JWT_SECRET=your_jwt_private_secret_key
+DB_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
 STRIPE_SECRET_KEY=your_stripe_secret_key
 ```
 
----
+## How to Run locally
 
-## Installation & Setup
+### Client
+1. Run `npm install`
+2. Run `npm run dev`
 
-### 1. Run Client
-```bash
-npm install
-npm run dev
-```
-
-### 2. Run Server
-```bash
-cd server
-npm install
-npm run dev
-```
+### Server
+1. Go to `server` folder
+2. Run `npm install`
+3. Run `npm run dev`
