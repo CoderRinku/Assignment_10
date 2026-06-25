@@ -16,7 +16,8 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'https://resideease.web.app',
-    'https://resideease.firebaseapp.com'
+    'https://resideease.firebaseapp.com',
+    'https://resideease-rinku.netlify.app'
   ],
   credentials: true
 }))
